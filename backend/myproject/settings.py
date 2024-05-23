@@ -158,6 +158,8 @@ AUTHENTICATION_BACKENDS = [
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv(
     'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = os.getenv(
+    'SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI')
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
@@ -182,7 +184,20 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 # django-cors-headers middleware seettings
+CORS_ALLOW_CREDENTIALS = True
+# NOTE: only use when troubleshooting in development:
+#  CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://localhost:5173',
+    'https://127.0.0.1:5173',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://localhost:5173',
+    'https://127.0.0.1:5173',
 ]

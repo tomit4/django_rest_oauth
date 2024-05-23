@@ -9,7 +9,6 @@ const MyCustomButton = () => {
     const navigate = useNavigate()
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse): Promise<void> => {
-            console.log('tokenResponse :=>', tokenResponse)
             try {
                 const res = await fetch(
                     import.meta.env.VITE_BACKEND_REGISTRATION_ROUTE,
@@ -19,11 +18,17 @@ const MyCustomButton = () => {
                             Accept: 'application/json',
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify({
-                            access_token: tokenResponse.access_token,
+                            code: tokenResponse.code,
                         }),
                     },
                 )
+                // Cookie is received (see Network tab),
+                // but secure cookies are not set without https...
+                console.log('res :=>', res)
+                console.log('res.headers :=>', res.headers)
+                console.log('document.cookie :=>', document.cookie)
                 if (!res.ok) throw new Error('Error While Authenticating User!')
                 const jsonRes = await res.json()
                 const testRes = await fetch(
@@ -49,10 +54,7 @@ const MyCustomButton = () => {
             console.error('ERROR :=>', err)
             navigate('/')
         },
-        flow: 'implicit',
-        // might be useful in getting refresh token from backend
-        // returns authorization code to be used to grab new access token/refreshtoken
-        // flow: 'auth-code',
+        flow: 'auth-code',
     })
 
     return <button onClick={() => login()}>Sign In With Google</button>
