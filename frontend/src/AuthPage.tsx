@@ -3,7 +3,12 @@
 // at the Login.tsx file level, which will render the
 // Splash/Intro Page instead of the Application based off
 // of the Google Oauth2 logic
+
 const AuthPage = () => {
-    return <div>Congratulations! You Are Authenticated!</div>
+    return (
+        <>
+            <div>Congratulations! You Are Authenticated!</div>
+        </>
+    )
 }
 export default AuthPage

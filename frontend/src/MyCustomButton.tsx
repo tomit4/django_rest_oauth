@@ -26,6 +26,8 @@ const MyCustomButton = () => {
                 )
                 // Cookie is received (see Network tab),
                 // but secure cookies are not set without https...
+                // NOTE: set up local https, but still not setting cookie
+                // NOTE: NOT visible in Firefox, but is visible in Chrome...
                 console.log('res :=>', res)
                 console.log('res.headers :=>', res.headers)
                 console.log('document.cookie :=>', document.cookie)

@@ -13,3 +13,4 @@ db.sqlite3-journal
 env
 *.vim
 test.sh
+*.pem
