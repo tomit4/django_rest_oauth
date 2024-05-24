@@ -24,14 +24,9 @@ const MyCustomButton = () => {
                         }),
                     },
                 )
-                // Cookie is received (see Network tab),
-                // but secure cookies are not set without https...
-                // NOTE: set up local https, but still not setting cookie
-                // NOTE: NOT visible in Firefox, but is visible in Chrome...
-                console.log('res :=>', res)
-                console.log('res.headers :=>', res.headers)
-                console.log('document.cookie :=>', document.cookie)
                 if (!res.ok) throw new Error('Error While Authenticating User!')
+                // TODO: Now that we have secure cookie, figure out how to pass it here
+                // and then separate this logic out as a router guard
                 const jsonRes = await res.json()
                 const testRes = await fetch(
                     import.meta.env.VITE_BACKEND_TEST_ROUTE,
