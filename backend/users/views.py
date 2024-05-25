@@ -1,9 +1,3 @@
-# TODO: For README later, this was achieved thanks to:
-#  https://scribe.rip/codex/google-sign-in-rest-api-with-python-social-auth-and-django-rest-framework-4d087cd6d47f
-# TODO: You can test google oauth access tokens by pasting them here:
-# Add that to README
-#  https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=TOKEN
-
 # TODO: We also need to integrate Django's Native Authentication as seen here:
 # https://python-social-auth.readthedocs.io/en/latest/use_cases.html#pass-custom-get-post-parameters-and-retrieve-them-on-authentication#signup-by-oauth-access-token
 # https://realpython.com/adding-social-authentication-to-django/
@@ -23,13 +17,40 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
 from django.conf import settings
+from django.middleware.csrf import get_token
 from django.contrib.auth.models import AnonymousUser
+from django.views.decorators.csrf import csrf_protect
+
 from social_django.utils import psa
 from requests.exceptions import HTTPError
 
 
-# NOTE: Currently somewhat of a hack using requests,
+# NOTE: Helper function for setting cookies (consider moving into separate file/Class)
+def set_authentication_cookies(response, access_token, refresh_token, request):
+    response.set_cookie(
+        key='access_token',
+        value=access_token,
+        httponly=True,
+        samesite='None',
+        secure=True,
+        path='/',
+    )
+    response.set_cookie(
+        key='refresh_token',
+        value=refresh_token,
+        httponly=True,
+        samesite='None',
+        secure=True,
+        path='/',
+    )
+    # NOTE: Sets the csrftoken as cookie by default
+    get_token(request)
+    return response
+
+
+# NOTE: Currently somewhat of a hack using python's native requests lib,
 # there is probably a better way using the social_auth.core
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -37,9 +58,10 @@ from requests.exceptions import HTTPError
 def register_by_access_token(request, backend):
     code = request.data.get('code')
     if not code:
-        return Response({'error': 'No code provided.'},
+        return Response({'error': 'No OAuth code provided.'},
                         status=status.HTTP_400_BAD_REQUEST)
     try:
+        # NOTE: Consider moving these settings into separate file/Class
         token_url = 'https://www.googleapis.com/oauth2/v4/token'
         data = {
             'code': code,
@@ -68,37 +90,15 @@ def register_by_access_token(request, backend):
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             res = Response(
-                # TODO: access_token should be sent back to client as http only cookie
-                {'token': token.key},
+                {'msg': 'User Authenticated, setting credentials'},
                 status=status.HTTP_200_OK,
             )
-            # Sends a secure cookie, doesn't work without https
-            # you can see it in the Network Tab of the devtools though
-            # Works on Chrome sort of...not Firefox though...
-            # react oauth2 google sets an access_token, it's not Chrome
-            # Firefox doesn't see it...
-            # access_token cannot be seen after refresh
-            # You could comment this out and Chrome would still have an access_token...
-
-            # Essentially making this useless:
-            res.set_cookie(
-                key='access_token',
-                value=token.key,
-                httponly=True,
-                samesite='None',
-                secure=True,
-                path='/',
-            )
-            # Instead, see README NOTE
-            print('res :=>', res)
-            print('res.headers :=>', res.headers)
-            print('res.cookies :=>', res.cookies)
+            res = set_authentication_cookies(res, token.key, refresh_token,
+                                             request)
             return res
         else:
             return Response(
-                {'errors': {
-                    'code': 'Invalid Authentication Code'
-                }},
+                {'error': 'User Not Found By OAuth Code'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
     except Exception as e:
@@ -108,13 +108,14 @@ def register_by_access_token(request, backend):
 
 # NOTE: As long as authorization returns 200, user is authenticated
 # TODO: redirect to get new access_token if access_token is expired via refresh_token
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
+@csrf_protect
 def authentication_test(request):
-    print(request.user)
+    #  print(request.user)
     if isinstance(request.user, AnonymousUser):
         return Response(
             {"error": "Access forbidden. You are not authenticated."},
-            status=status.HTTP_403_FORBIDDEN)
+            status=status.HTTP_401_UNAUTHORIZED)
     return Response(
         {'message': "User successfully authenticated"},
         status=status.HTTP_200_OK,

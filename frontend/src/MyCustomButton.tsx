@@ -6,6 +6,18 @@ import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
 
 const MyCustomButton = () => {
+    // TODO: Put in utils folder/file
+    const grabStoredCookie = (cookieKey: string): string => {
+        const cookies: { [key: string]: string } = document.cookie
+            .split('; ')
+            .reduce((prev: { [key: string]: string }, current) => {
+                const [key, ...value] = current.split('=')
+                prev[key] = value.join('=')
+                return prev
+            }, {})
+        const cookieVal = cookieKey in cookies ? cookies[cookieKey] : ''
+        return cookieVal
+    }
     const navigate = useNavigate()
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse): Promise<void> => {
@@ -27,16 +39,17 @@ const MyCustomButton = () => {
                 if (!res.ok) throw new Error('Error While Authenticating User!')
                 // TODO: Now that we have secure cookie, figure out how to pass it here
                 // and then separate this logic out as a router guard
-                const jsonRes = await res.json()
+                const csrfToken = grabStoredCookie('csrftoken')
                 const testRes = await fetch(
                     import.meta.env.VITE_BACKEND_TEST_ROUTE,
                     {
-                        method: 'GET',
+                        method: 'POST',
                         headers: {
                             Accept: 'application/json',
                             'Content-Type': 'application/json',
-                            Authorization: `Token ${jsonRes.token}`,
+                            'X-CSRFToken': csrfToken,
                         },
+                        credentials: 'include',
                     },
                 )
                 if (!testRes.ok)

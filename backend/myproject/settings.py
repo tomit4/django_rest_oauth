@@ -55,8 +55,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -143,6 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Rest Framework Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.auth.CookieTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -194,14 +195,15 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'http://127.0.0.1:5173',
     'https://localhost:5173',
-    'https://127.0.0.1:5173',
 ]
+
+# CSRF Cookie Settings
+CSRF_COOKIE_SECURE = True
+#  CSRF_COOKIE_SAMESITE = 'Strict'
+#  CSRF_COOKIE_NAME = 'csrftoken'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
-    'http://127.0.0.1:5173',
     'https://localhost:5173',
-    'https://127.0.0.1:5173',
 ]
