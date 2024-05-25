@@ -106,7 +106,6 @@ def register_by_access_token(request, backend):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# NOTE: As long as authorization returns 200, user is authenticated
 # TODO: redirect to get new access_token if access_token is expired via refresh_token
 @api_view(['POST'])
 @csrf_protect

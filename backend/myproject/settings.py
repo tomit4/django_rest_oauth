@@ -200,8 +200,8 @@ CORS_ALLOWED_ORIGINS = [
 
 # CSRF Cookie Settings
 CSRF_COOKIE_SECURE = True
-#  CSRF_COOKIE_SAMESITE = 'Strict'
-#  CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_NAME = 'csrftoken'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
