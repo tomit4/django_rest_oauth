@@ -4,6 +4,7 @@
 // Splash/Intro Page instead of the Application based off
 // of the Google Oauth2 logic
 
+// TODO: Protect this page as a test of what will be a router guard
 const AuthPage = () => {
     return (
         <>
