@@ -1,16 +1,3 @@
-# TODO: We also need to integrate Django's Native Authentication as seen here:
-# https://python-social-auth.readthedocs.io/en/latest/use_cases.html#pass-custom-get-post-parameters-and-retrieve-them-on-authentication#signup-by-oauth-access-token
-# https://realpython.com/adding-social-authentication-to-django/
-
-# e.g.
-# from django.contrib.auth import login
-# if user:
-#     login(request, user) ...
-
-# NOTE: And then do "something" via native Django to implement login...maybe?
-# NOTE: Django's auth system DOES currently work with this base file,
-# so maybe this isn't necessary...
-
 import requests
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -79,15 +66,16 @@ def register_by_access_token(request, backend):
 
         tokens = response.json()
         access_token = tokens.get('access_token')
-        # TODO: refresh_token should be set in key/value store (i.e. cache)
+        # TODO: refresh_token should be set in key/value store (i.e. redis cache)
         # and used to grab new access_token when access_token is expired
-        # TODO: refresh_token could not exist, handle exception
+        # TODO: refresh_token could not exist, handle exception, but don't return
         refresh_token = tokens.get('refresh_token')
-        # TODO: certain user info should be stored/hashed in DB on sign up
-        # and used for other services
         user = request.backend.do_auth(access_token)
 
         if user:
+            # TODO: Use the user.email to sign up/set user as logged in
+            #  print('user.email :=>', user.email)
+
             token, _ = Token.objects.get_or_create(user=user)
             res = Response(
                 {'msg': 'User Authenticated, setting credentials'},
